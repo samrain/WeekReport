@@ -35,6 +35,7 @@ def printelement(element,parentname,projectname,pmid,tasklist):
     打开一个目录下所有ganttproject文件
 """
 dir_name = "/home/rain/下载/gan"
+outputdir= "/home/rain/下载/plan"
 file_list = [f_name for f_name in os.listdir(dir_name) if f_name.endswith('gan')]
 
 """
@@ -45,14 +46,16 @@ conn = sqlite3.connect(":memory:")
 
 cur = conn.cursor()
 """
-    生成3张表
+    生成4张表
     计划任务表  taskfromgantproj
     资源表  resources
     资源分配表  allocations
+    当前任务表   tasknow
 """
 cur.execute('CREATE TABLE "taskfromgantproj" ("id" INTEGER, "name" VARCHAR, "startdate" DATETIME, "duration" INTEGER,"plan" VARCHAR,"strdur" VARCHAR,"pmid" INTEGER)')
 cur.execute('CREATE TABLE "resources" ("id" INTEGER, "name" VARCHAR)')
 cur.execute('CREATE TABLE "allocations" ("taskid" INTEGER, "resourceid" INTEGER)')
+cur.execute('CREATE TABLE "tasknow" ("plan" VARCHAR, "taskname" VARCHAR, "name" VARCHAR, "enddate" DATETIME, "checker" VARCHAR)')
 
 for f_in_name in file_list:
     tree = ET.ElementTree(file=os.path.join(dir_name,f_in_name))
@@ -97,7 +100,7 @@ for f_in_name in file_list:
     """
         导出计划任务分配表
     """
-    cur.execute('SELECT a.plan,a.name taskname,c.name,date(a.startdate,a.strdur) enddate,(select resources.name from resources where resources.id = a.pmid) FROM taskfromgantproj a,allocations b,resources c where a.id = b.taskid and b.resourceid = c.id and a.startdate >= ? and date(a.startdate,a.strdur)<= ?',['2012-05-14','2012-05-18'])
+    cur.execute('SELECT a.plan,a.name taskname,c.name,date(a.startdate,a.strdur) enddate,(select resources.name from resources where resources.id = a.pmid) checker FROM taskfromgantproj a,allocations b,resources c where a.id = b.taskid and b.resourceid = c.id and a.startdate >= ? and date(a.startdate,a.strdur)<= ? order by date(a.startdate,a.strdur),a.name',['2012-05-14','2012-05-18'])
     rows = cur.fetchall()
     r = 1
     book = xlwt.Workbook()
@@ -117,8 +120,49 @@ for f_in_name in file_list:
     sheet1.write(0,4,u'检查人')
     sheet1.write(0,5,u'预计工期')
 
-    book.save(os.path.join(dir_name,projectname.encode('utf-8'))+'plan.xls')
+    book.save(os.path.join(outputdir,projectname.encode('utf-8'))+'plan.xls')
+    cur.execute('INSERT INTO tasknow SELECT a.plan,a.name taskname,c.name,date(a.startdate,a.strdur) enddate,(select resources.name from resources where resources.id = a.pmid) checker FROM taskfromgantproj a,allocations b,resources c where a.id = b.taskid and b.resourceid = c.id and a.startdate >= ? and date(a.startdate,a.strdur)<= ?',['2012-05-14','2012-05-18'])
 
+"""
+    统计下周任务分配情况
+"""
+book1 = xlwt.Workbook()
+sheet1 = book1.add_sheet(u"下周任务总览")
+"""
+    How many group by计划
+"""
+cur.execute('select plan,count(1) tasknum from tasknow group by plan')
+r=0
+sheet1.write(0,0,u'计划')
+sheet1.write(0,1,u'任务数')
+for row in cur.fetchall():
+    r+=1
+    sheet1.write(r,0,row[0])
+    sheet1.write(r,1,row[1])
+"""
+    How many group by执行人
+"""
+cur.execute('select name,count(1) tasknum from tasknow group by name')
+r+=2
+sheet1.write(r,0,u'执行人')
+sheet1.write(r,1,u'任务数')
+for row in cur.fetchall():
+    r+=1
+    sheet1.write(r,0,row[0])
+    sheet1.write(r,1,row[1])
+"""
+    How many group by截止日期
+"""
+cur.execute('select enddate,count(1) tasknum from tasknow group by enddate')
+r+=2
+sheet1.write(r,0,u'截止日期')
+sheet1.write(r,1,u'任务数')
+for row in cur.fetchall():
+    r+=1
+    sheet1.write(r,0,row[0])
+    sheet1.write(r,1,row[1])
+
+book1.save(os.path.join(outputdir,'下周任务总览.xls'))
 cur.close()
 #conn.commit()
 conn.close()

@@ -48,6 +48,7 @@ def writetractable(tasklist,checker):
         for taskinfo in task:
             sheet1.write(r,tr,taskinfo)
             tr+=1
+        sheet1.write(r,tr-1,'')
         sheet1.write(r,8,xlwt.Formula(S1.replace('?', str(r+1),7)))#实际进度
         sheet1.write(r,9,xlwt.Formula(S2.replace('?', str(r+1),7)))#实际工时
         r+=1
@@ -55,7 +56,7 @@ def writetractable(tasklist,checker):
         保存XLS文件
     """
 
-    filename = u'【TG-IT(1205-2)】任务执行跟踪表('+checker + u').xls'
+    filename = u'【TG-IT(1205-3)】任务执行跟踪表('+checker + u').xls'
     book.save(os.path.join(u"/home/rain/下载/",filename))
 
 def readxlsfile(infolist,flag):

@@ -21,12 +21,15 @@ def writeweeklyreport(tasklist):
         @rtype v:
     """
     book = xlwt.Workbook()
-    sheet1 = book.add_sheet("1", cell_overwrite_ok=True)
-    title = []#标题
-    title.append([u'计划名称',u'任务名称',u'截至日期',u'预计工期(分钟)',u'检查人',u'记录位置/撤销或推迟原因',u'实际工期',u'',u'一',u'',u'二',u'',u'三',u'',u'四',u'',u'五',u'',u'六',u'',u'七',u''])
-    title.append([u'',u'',u'',u'',u'',u'',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时'])
+    """
+        写sheet1=计划任务
+    """
+    sheet1 = book.add_sheet(u"计划任务", cell_overwrite_ok=True)
+    title1 = []#标题
+    title1.append([u'计划名称',u'任务名称',u'截至日期',u'预计工期(分钟)',u'检查人',u'记录位置/撤销或推迟原因',u'实际工期',u'',u'一',u'',u'二',u'',u'三',u'',u'四',u'',u'五',u'',u'六',u'',u'七',u''])
+    title1.append([u'',u'',u'',u'',u'',u'',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时'])
     tnum = 0
-    for t in title:#填入标题
+    for t in title1:#填入标题
         trow = 0
         for tt in t:
             sheet1.write(tnum,trow,tt)
@@ -55,11 +58,50 @@ def writeweeklyreport(tasklist):
         sheet1.write(r,6,xlwt.Formula(S1.replace('?', str(r+1),7)))#实际进度
         sheet1.write(r,7,xlwt.Formula(S2.replace('?', str(r+1),7)))#实际工时
         r+=1
+    
+    """
+        写sheet2=临时任务
+    """
+    sheet2 = book.add_sheet(u"临时任务", cell_overwrite_ok=True)
+    title2 = []#标题
+    title2.append([u'任务名称',u'分配人',u'被执行人/受益人',u'截至日期',u'预计工期(分钟)',u'记录位置/撤销或推迟原因',u'实际工期',u'',u'一',u'',u'二',u'',u'三',u'',u'四',u'',u'五',u'',u'六',u'',u'七',u''])
+    title2.append([u'',u'',u'',u'',u'',u'',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时'])
+    tnum = 0
+    for t in title2:#填入标题
+        trow = 0
+        for tt in t:
+            sheet2.write(tnum,trow,tt)
+            trow += 1
+        tnum +=1
+    """
+        S1：计算当前最新的进度
+        S2：计算实际工期合计
+    """
+    tempi=2
+    while tempi < 25:#填入实际工期计算公式
+        sheet2.write(tempi,6,xlwt.Formula(S1.replace('?', str(tempi+1),7)))#实际进度
+        sheet2.write(tempi,7,xlwt.Formula(S2.replace('?', str(tempi+1),7)))#实际工时
+        tempi+=1
+
+    """
+        写sheet3=心得分享
+    """
+    sheet3 = book.add_sheet(u"心得分享", cell_overwrite_ok=True)
+    title3 = []#标题
+    title3.append([u'类型',u'简述',u'链接'])
+    tnum = 0
+    for t in title3:#填入标题
+        trow = 0
+        for tt in t:
+            sheet3.write(tnum,trow,tt)
+            trow += 1
+        tnum +=1
+    
     """
         保存XLS文件
     """
-    filename = '【TG-IT(1205-2)】个人周工作报告(' + task[2].encode('utf-8') + ').xls'
-    book.save(os.path.join(dir_name,filename))
+    filename = '【TG-IT(1205-3)】个人周工作报告(' + task[2].encode('utf-8') + ').xls'
+    book.save(os.path.join(weekreportdir,filename))
 
 def writetractable(tasklist):
     """
@@ -70,7 +112,7 @@ def writetractable(tasklist):
         @rtype v:
     """
     book = xlwt.Workbook()
-    sheet1 = book.add_sheet("1", cell_overwrite_ok=True)
+    sheet1 = book.add_sheet(u"计划任务", cell_overwrite_ok=True)
     title = []#标题
     title.append([u'计划名称',u'任务名称',u'截至日期',u'预计工期(分钟)',u'执行人',u'记录位置/撤销或推迟原因',u'效果',u'质量',u'实际工期',u'',u'一',u'',u'二',u'',u'三',u'',u'四',u'',u'五',u'',u'六',u'',u'七',u''])
     title.append([u'',u'',u'',u'',u'',u'',u'',u'',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时',u'进度',u'工时'])
@@ -107,14 +149,16 @@ def writetractable(tasklist):
     """
         保存XLS文件
     """
-    filename = '【TG-IT(1205-2)】任务执行跟踪表(' + task[4].encode('utf-8') + ').xls'
-    book.save(os.path.join(dir_name,filename))
+    filename = '【TG-IT(1205-3)】任务执行跟踪表(' + task[4].encode('utf-8') + ').xls'
+    book.save(os.path.join(tracdir,filename))
 
 
 """
     打开一个目录下所有xls文件
 """
-dir_name = "/home/rain/下载/gan"
+dir_name = "/home/rain/下载/plan"
+tracdir = '/home/rain/下载/trac'
+weekreportdir = '/home/rain/下载/weekreport'
 file_list = [f_name for f_name in os.listdir(dir_name) if f_name.endswith('plan.xls')]
 
 tasklist = []

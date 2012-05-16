@@ -21,14 +21,9 @@ conn = sqlite3.connect('taskdb.sqlite')
 cur = conn.cursor()
 
 """
-    打开一个XLS文件
-"""
-#xlsfile = xlrd.open_workbook('test.xls')
-
-"""
     打开一个目录下所有xls文件
 """
-dir_name = "/home/rain/下载"
+dir_name = "/home/rain/下载/trac"
 file_list = [f_name for f_name in os.listdir(dir_name) if f_name.endswith('xls')]
 #print file_list
 for f_in_name in file_list:
